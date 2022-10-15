@@ -45,8 +45,7 @@ def SendMessage(requestmovemessage):
 
 #------------------------------------------------------------------------------------------------------------------------------
 # Observation Space 
-observationMatrix = [[],[],[]]
-# [[x][y][item code]]
+observationMatrix = numpy.full((400,400),-1)
 while True:
 
     msgFromServer = UDPClientSocket.recvfrom(bufferSize)[0].decode('ascii')
@@ -93,71 +92,76 @@ while True:
     # walls = 1
     # items = {food:2,ammo:3, keys:[(r,4),(g,5),(b,6),(y,7)], treasure:8}
     # exit = 9
+    # player = 10
+
     if "nearbyitem" in msgFromServer:
         item = msgFromServer.split(":")[1]
         itemSplit = item.split(",")
-        posX = itemSplit[1]
-        posY = itemSplit[2]
+        posX = float(itemSplit[1])
+        posY = float(itemSplit[2])
         itemName = itemSplit[0]
-        observationMatrix[0].append(posX)
-        observationMatrix[1].append(posY)
+        itemCode = -1
         match itemName:
             case "food":
-                observationMatrix[2].append(2)
+                itemCode = 2
                 break
             case "ammo":
-                observationMatrix[2].append(3)
+                itemCode = 3
                 break
             case "redkey":
-                observationMatrix[2].append(4)
+                itemCode = 4
                 break
             case "greenkey":
-                observationMatrix[2].append(5)
+                itemCode = 5
                 break
             case "bluekey":
-                observationMatrix[2].append(6)
+                itemCode = 6
                 break
             case "yellowkey":
-                observationMatrix[2].append(7)
+                itemCode = 7
                 break
             case "treasure":
-                observationMatrix[2].append(8)
+                itemCode = 9
                 break
+        observationMatrix[posX,posY] = itemCode
 
     if "nearbyfloors" in msgFromServer:
         floors = msgFromServer.split(":")[1]
         floorSplit = pos.split(",")
+        Xpos=0
+        Ypos=0
         for loc in floorSplit:
             if floorSplit.index(loc) // 2 == 0:
-                observationMatrix[0].append(loc)
+                Xpos = float(loc)
             else: 
-                observationMatrix[1].append(loc)
-                observationMatrix[2].append(0)
+                Ypos = float(loc)
+                observationMatrix[Xpos,Ypos] = 0
         
     if "nearbywalls" in msgFromServer:
         wall = msgFromServer.split(":")[1]
         wallSplit = pos.split(",")
+        Xpos=0
+        Ypos=0
         for loc in wallSplit:
             if wallSplit.index(loc) // 2 == 0:
-                observationMatrix[0].append(loc)
-            else: 
-                observationMatrix[1].append(loc)
-                observationMatrix[2].append(1)
+                Xpos = float(loc)
+            else:
+                Ypos = float(loc)
+                observationMatrix[Xpos,Ypos] = 1
         
     if "playerupdate" in msgFromServer:
         pos = msgFromServer.split(":")[1]
         posSplit = pos.split(",")
         posx = float(posSplit[0])
         posy = float(posSplit[1])
+        observationMatrix[posx, posy] = 10
 
     if "exit" in msgFromServer:
         exitLoc = msgFromServer.split(":")[1]
         exitCoords = exitLoc.split(",")
-        pos_x = exitCoords[0]
-        pos_y = exitCoords[1]
-        observationMatrix[0].append(pos_x)
-        observationMatrix[1].append(pos_y)
-        observationMatrix[2].append(9)
+        pos_x = float(exitCoords[0])
+        pos_y = float(exitCoords[1])
+        observationMatrix[pos_x, pos_y] = 9
 #------------------------------------------------------------------------------------------------------------------------------------------
 
     now = time.time()
