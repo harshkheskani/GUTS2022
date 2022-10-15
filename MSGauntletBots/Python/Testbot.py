@@ -2,7 +2,7 @@ import socket
 import time
 import random
 import numpy
- 
+from email import message
 
 msgFromClient       = "requestjoin:mydisplayname"
 name = "mydisplayname"
@@ -39,19 +39,53 @@ UDPClientSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
 UDPClientSocket.sendto(bytesToSend, serverAddressPort)
 
  
-
-
-
 def SendMessage(requestmovemessage):
     bytesToSend = str.encode(requestmovemessage)
     UDPClientSocket.sendto(bytesToSend, serverAddressPort)
 
+#------------------------------------------------------------------------------------------------------------------------------
+# Observation Space 
 observationMatrix = [[],[],[]]
 # [[x][y][item code]]
 while True:
 
     msgFromServer = UDPClientSocket.recvfrom(bufferSize)[0].decode('ascii')
     
+    #---------------------------------------------------------------------------------------------------
+    #Action Space 
+    metadata = {'render.modes': ['console','rgb_array']}
+    #Direction constants
+    n_actions = 18 #10 possible steps each turn
+
+    list_moves =  [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18]
+    # moven = 0
+    # moves = 1
+    # movee = 2
+    # movew = 3
+    # movenw = 4
+    # movesw = 5
+    # movene = 6
+    # movese = 7
+    # fire = 8
+    # stop = 9
+    # facen = 10
+    # faces = 11
+    # facee = 12
+    # facew = 13
+    # facenw = 14
+    # facesw = 15
+    # facene = 16
+    # facese = 17
+    # move_xy = 18
+    # dict_moves =  {  "0":"facen",  "1":"faces", "2":"facee","3":"facew","4":"facenw","5":"facesw","6":"facene","7":"se","8":"fire","9":"stop"}
+    
+    
+    #Grid label constants
+    
+    #end of morgan added 
+    #End Action Space
+    #---------------------------------------------------------------------------------------------------
+
     ##uncomment to see message format from server
     #print(msgFromServer)
     #Item codes:
@@ -124,7 +158,7 @@ while True:
         observationMatrix[0].append(pos_x)
         observationMatrix[1].append(pos_y)
         observationMatrix[2].append(9)
-
+#------------------------------------------------------------------------------------------------------------------------------------------
 
     now = time.time()
 
